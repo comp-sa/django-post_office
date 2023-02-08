@@ -4,6 +4,7 @@ from collections import namedtuple
 from uuid import uuid4
 from email.mime.nonmultipart import MIMENonMultipart
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.db import models
@@ -311,7 +312,11 @@ class Attachment(models.Model):
     """
     A model describing an email attachment.
     """
-    file = models.FileField(_('File'), upload_to=get_upload_path)
+    DB_FILE_STORAGE_UPLOAD_PATH = 'post_office.Attachment/bytes/name/mimetype'
+
+    file = models.FileField(_('File'),
+                            upload_to=DB_FILE_STORAGE_UPLOAD_PATH if settings.DEFAULT_FILE_STORAGE else get_upload_path)
+    bytes = models.TextField(null=True, blank=True)
     name = models.CharField(_('Name'), max_length=255, help_text=_("The original filename"))
     emails = models.ManyToManyField(Email, related_name='attachments',
                                     verbose_name=_('Emails'))
